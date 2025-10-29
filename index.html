@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>South Park - Lecteur Néon Rose</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --neon-pink: #ff10f0;
+            --neon-purple: #9d00ff;
+            --dark-bg: #0a0a0a;
+            --card-bg: rgba(20, 20, 30, 0.8);
+            --success-color: #00ff88;
+            --warning-color: #ffaa00;
+            --info-color: #00aaff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 16, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 80%, rgba(157, 0, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 40%, rgba(255, 16, 240, 0.05) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: white;
+            text-shadow: 
+                0 0 10px var(--neon-pink),
+                0 0 20px var(--neon-pink),
+                0 0 30px var(--neon-pink),
+                0 0 40px var(--neon-purple);
+            animation: neon-pulse 2s infinite alternate;
+        }
+
+        @keyframes neon-pulse {
+            from {
+                text-shadow: 
+                    0 0 10px var(--neon-pink),
+                    0 0 20px var(--neon-pink),
+                    0 0 30px var(--neon-pink),
+                    0 0 40px var(--neon-purple);
+            }
+            to {
+                text-shadow: 
+                    0 0 5px var(--neon-pink),
+                    0 0 10px var(--neon-pink),
+                    0 0 15px var(--neon-pink),
+                    0 0 20px var(--neon-purple),
+                    0 0 35px var(--neon-purple);
+            }
+        }
+
+        .subtitle {
+            color: #ccc;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .debug-info {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--info-color);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--neon-pink);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .player-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .video-wrapper {
+            flex: 3;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 16, 240, 0.3);
+            border: 1px solid rgba(255, 16, 240, 0.2);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-placeholder {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            color: var(--neon-pink);
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .video-placeholder h3 {
+            color: var(--neon-pink);
+            margin-bottom: 15px;
+        }
+
+        .video-placeholder p {
+            color: #ccc;
+            margin-bottom: 20px;
+            max-width: 400px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .playlist-container {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            box-shadow: 0 0 15px rgba(255, 16, 240, 0.3);
+            border: 1px solid rgba(255, 16, 240, 0.2);
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 16, 240, 0.3);
+        }
+
+        .playlist-title {
+            font-size: 1.5rem;
+            color: var(--neon-pink);
+            text-shadow: 0 0 5px var(--neon-pink);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 16, 240, 0.3);
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 16, 240, 0.5);
+            border-color: var(--neon-pink);
+        }
+
+        .season-group {
+            margin-bottom: 20px;
+        }
+
+        .season-header {
+            background-color: rgba(255, 16, 240, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .season-header:hover {
+            background-color: rgba(255, 16, 240, 0.3);
+            box-shadow: 0 0 10px rgba(255, 16, 240, 0.5);
+        }
+
+        .season-title {
+            font-weight: bold;
+            color: var(--neon-pink);
+        }
+
+        .episode-list {
+            padding-left: 10px;
+        }
+
+        .episode-item {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .episode-item:hover {
+            background-color: rgba(255, 16, 240, 0.2);
+            transform: translateX(5px);
+        }
+
+        .episode-item.active {
+            background-color: rgba(255, 16, 240, 0.3);
+            border-left: 3px solid var(--neon-pink);
+        }
+
+        .episode-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+
+        .episode-number {
+            color: var(--neon-purple);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .current-info {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(255, 16, 240, 0.1);
+            border-radius: 5px;
+        }
+
+        .current-title {
+            font-size: 1.2rem;
+            color: var(--neon-pink);
+            margin-bottom: 5px;
+        }
+
+        .current-season {
+            color: var(--neon-purple);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: rgba(255, 16, 240, 0.2);
+            border: 1px solid var(--neon-pink);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: rgba(255, 16, 240, 0.4);
+            box-shadow: 0 0 10px rgba(255, 16, 240, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-color: rgba(255, 16, 240, 0.3);
+            border-color: var(--neon-pink);
+        }
+
+        .btn-success {
+            background-color: rgba(0, 255, 136, 0.2);
+            border-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--neon-pink);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-pink);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-purple);
+        }
+
+        /* Responsive design */
+        @media (max-width: 992px) {
+            .player-container {
+                flex-direction: column;
+            }
+            
+            .playlist-container {
+                max-height: 400px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>South Park</h1>
+            <p class="subtitle">Playlist Complète</p>
+        </header>
+	<div class="debug-info" id="debugInfo">
+            <i class="fas fa-bug"></i> Debug: Initialisation...
+        </div>
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalEpisodes">0</div>
+                <div class="stat-label">Épisodes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalSeasons">0</div>
+                <div class="stat-label">Saisons</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="currentEpisode">-</div>
+                <div class="stat-label">En cours</div>
+            </div>
+        </div>
+
+        <div class="player-container">
+            <div class="video-wrapper">
+                <div class="video-placeholder" id="videoPlaceholder">
+                    <i class="fas fa-play-circle"></i>
+                    <h3>Sélectionnez un épisode</h3>
+                    <p>Choisissez un épisode dans la playlist pour voir les options de lecture disponibles</p>
+                    <div class="action-buttons" id="actionButtons" style="display: none;">
+                        <a href="#" class="btn btn-primary" id="downloadBtn" target="_blank">
+                            <i class="fas fa-download"></i> Télécharger
+                        </a>
+                        <button class="btn btn-success" id="copyBtn">
+                            <i class="fas fa-copy"></i> Copier le lien
+                        </button>
+                    </div>
+                </div>
+                <div class="current-info" id="currentInfo" style="display: none;">
+                    <div class="current-title" id="currentTitle"></div>
+                    <div class="current-season" id="currentSeason"></div>
+                </div>
+            </div>
+
+            <div class="playlist-container">
+                <div class="playlist-header">
+                    <h2 class="playlist-title">
+                        <span id="episodeCount">0</span> Épisodes
+                    </h2>
+                </div>
+                <input type="text" class="search-box" id="searchBox" placeholder="Rechercher un épisode...">
+                <div id="playlistContent">
+                    <div style="text-align: center; padding: 20px;">
+                        <div class="loading"></div>
+                        <p>Chargement des épisodes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="prevBtn">
+                <i class="fas fa-step-backward"></i> Précédent
+            </button>
+            <button class="btn" id="nextBtn">
+                <i class="fas fa-step-forward"></i> Suivant
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Playlist M3U complète - Version simplifiée
+        const m3uPlaylist = [
+                "https://downloads.tatanos.fr/done/Series/South.Park/South%20Park%20The%20End%20Of%20Obesity.2024.MULTI.1080p.WEB-DL.H264-FTMVHD/South%20Park%20The%20End%20Of%20Obesity.2024.MULTI.1080p.WEB-DL.H264-FTMVHD.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E01%20-%20Cartman%20a%20une%20sonde%20anale.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E02%20-%20Muscle%20Plus%204000.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E03%20-%20Volcano.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E04%20-%20Une%20promenade%20compl%C3%A8tement%20folle%20avec%20Al%20Super%20Gay.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E05%20-%20Un%20%C3%A9l%C3%A9phant%20fait%20l%27amour%20%C3%A0%20un%20cochon.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E06%20-%20La%20Mort.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E07%20-%20Conjonctivite.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E08%20-%20Le%20Petit%20%C3%89thernopien.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E09%20-%20Monsieur%20Hankey%2C%20le%20petit%20caca%20No%C3%ABl.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E10%20-%20Damien.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E11%20-%20Chirurgie%20esth%C3%A9tique.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E12%20-%20Mecha%20Streisand.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S01/S01E13%20-%20La%20m%C3%A8re%20de%20Cartman%20est%20une%20folle%20du%20cul.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E01%20-%20Jamais%20sans%20mon%20anus.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E02%20-%20La%20m%C3%A8re%20de%20Cartman%20est%20toujours%20une%20folle%20du%20cul.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E03%20-%20Le%20Zizi%20de%20Ike.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E04%20-%20Le%20Charmeur%20de%20poules.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E05%20-%20Le%20F%C5%93tus%20siamo-maxillaire.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E06%20-%20La%20Grenouille%20mexicaine%20hypnotique%20du%20sud%20du%20Sri%20Lanka.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E07%20-%20La%20Ville%20au%20bord%20de%20l%27%C3%A9ternit%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E08%20-%20L%27%C3%89t%C3%A9%2C%20%C3%A7a%20craint.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E09%20-%20Boulettes%20de%20Chef%20au%20chocolat%20sal%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E10%20-%20Varicelle.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E11%20-%20Roger%20Ebert%20devrait%20manger%20moins%20gras.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E12%20-%20La%20Gar%C3%A7onni%C3%A8re.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E13%20-%20Les%20Journ%C3%A9es%20vaches.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E14%20-%20Chef%20Aid.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E15%20-%20Poisson%20sanglant.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E16%20-%20Joyeux%20No%C3%ABl%20Charlie%20Manson%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E17%20-%20Les%20Gnomes%20voleurs%20de%20slips.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S02/S02E18%20-%20L%27Homme%20des%20glaces%E2%80%8B.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E01%20-%20Tropicale%20schtropicale.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E02%20-%20Combustion%20spontan%C3%A9e.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E03%20-%20La%20Maman%20de%20Chef.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E04%20-%20Les%20Jakovasaures.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E05%20-%20Tweek%20contre%20Craig.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E06%20-%20Le%20Panda%20du%20harc%C3%A8lement%20sexuel.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E07%20-%20Orgie%20de%20chats.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E08%20-%20Deux%20hommes%20nus%20dans%20un%20jacuzzi.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E09%20-%20Les%20Scouts%20juifs.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E10%20-%20Korn%20et%20le%20myst%C3%A8re%20myst%C3%A9rieux%20des%20pirates%20fant%C3%B4mes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E11%20-%20Chinpokomon.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E12%20-%20Les%20Comptines%20du%20singe%20batteur.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E13%20-%20%C3%89thernopiens%20dans%20l%27espace.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E14%20-%20M%C3%A9daille%20de%20connerie%20avec%20palme.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E15%20-%20Les%20Chants%20de%20No%C3%ABl%20de%20Monsieur%20Hankey.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E16%20-%20Dieu%20es-tu%20l%C3%A0%20%3F%20C%27est%20J%C3%A9sus%20%C3%A0%20l%27appareil.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S03/S03E17%20-%20Le%20Bruit%20marron.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E01%20-%20La%20Petite%20F%C3%A9e%20des%20dents.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E02%20-%20L%27Inqualifiable%20Crime%20de%20haine%20de%20Cartman.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E03%20-%20Timmy.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E04%20-%20Quintupl%C3%A9s%20contorsionnistes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E05%20-%20Cartman%20s%27inscrit%20%C3%A0%20la%20NAMBLA.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E06%20-%20Tampons%20en%20cheveux%20de%20Cherokee.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E07%20-%20Chef%20p%C3%A8te%20les%20plombs.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E08%20-%20Un%20truc%20qu%27on%20peut%20faire%20avec%20le%20doigt.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E09%20-%20Les%20handicap%C3%A9s%20vont-ils%20en%20enfer%20%3F.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E10%20-%20Probablement%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E11%20-%20CM1.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E12%20-%20Le%20Super-Classeur.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E13%20-%20Thanksgiving.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E14%20-%20Pip.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E15%20-%20Camp%20de%20r%C3%A9gime.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E16%20-%20Le%20Mot%20en%20%C2%AB%20M%20%C2%BB.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S04/S04E17%20-%20Le%20Cycle%20du%20caca.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E01%20-%20Y%27en%20a%20dans%20le%20ventilo.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E02%20-%20Combat%20d%27infirmes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E03%20-%20Les%20Super%20Meilleurs%20Potes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E04%20-%20Scott%20Tenorman%20doit%20mourir.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E05%20-%20Terrance%20et%20Philippe%20%3A%20de%20temp%C3%AAtes%20en%20naufrage.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E06%20-%20CartmanLand.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E07%20-%20Du%20bon%20usage%20du%20pr%C3%A9servatif.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E08%20-%20Servietsky.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E09%20-%20Oussama%20Ben%20Laden%20pue%20du%20cul.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E10%20-%20Comment%20manger%20avec%20son%20cul.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E11%20-%20L%27Engin.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E12%20-%20Les%20riches%20d%C3%A9barquent.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E13%20-%20Kenny%20se%20meurt.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S05/S05E14%20-%20L%27%C3%A9pisode%20de%20Butters.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E01%20-%20Jared%20a%20le%20SIDA.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E02%20-%20Asspen.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E03%20-%20Couillo-mentonite.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E04%20-%20Le%20veau%2C%20c%27est%20rigolo.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E05%20-%20La%20Bande-Annonce%20du%20nouveau%20Terrance%20et%20Philippe.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E06%20-%20Professeur%20Chaos%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E07%20-%20Les%20Simpson%20l%27ont%20d%C3%A9j%C3%A0%20fait%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E08%20-%20Les%20cathos%2C%20c%27est%20chaud.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E09%20-%20B%C3%A9rets%20gratos.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E10%20-%20Les%20seins%20de%20B%C3%A9b%C3%A9%20mettent%20en%20danger%20la%20soci%C3%A9t%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E11%20-%20Les%20enl%C3%A8vements%20d%27enfants%2C%20c%27est%20pas%20marrant.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E12%20-%20Une%20%C3%A9chelle%20pour%20aller%20au%20ciel.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E13%20-%20Le%20Retour%20de%20la%20communaut%C3%A9%20de%20l%27anneau%20des%20deux%20tours.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E14%20-%20Le%20Camp%20de%20la%20mort%20de%20tol%C3%A9rance.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E15%20-%20Le%20Plus%20Gros%20Connard%20de%20l%27univers.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E16%20-%20Mon%20Futur%20Moi%20et%20moi.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S06/S06E17%20-%20La%20Chute%20du%20tra%C3%AEneau%20rouge.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E01%20-%20D%C3%A9programm%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E02%20-%20Les%20Gangs%20de%20Denver.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E03%20-%20Papier%20toilette.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E04%20-%20Plut%C3%B4t%20du%20genre%20country.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E05%20-%20Gros%20cul%20et%20t%C3%AAte%20de%20n%C5%93ud.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E06%20-%20Les%20Petits%20Policiers.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E07%20-%20La%20Cupidit%C3%A9%20de%20l%27homme%20rouge.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E08%20-%20South%20Park%20est%20gay.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E09%20-%20Rock%20chr%C3%A9tien.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E10%20-%20Rencontre%20du%20troisi%C3%A8me%20%C3%A2ge.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E11%20-%20Casa%20Bonita.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E12%20-%20Tout%20sur%20les%20mormons.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E13%20-%20Stop%20clopes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E14%20-%20Raisins.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S07/S07E15%20-%20No%C3%ABl%20au%20Canada.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E01%20-%20Les%20armes%2C%20c%27est%20rigolo.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E02%20-%20Les%20st%C3%A9ro%C3%AFdes%2C%20%C3%A7a%20d%C3%A9chire.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E03%20-%20La%20Passion%20du%20Juif.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E04%20-%20On%20t%27a%20niqu%C3%A9%20ta%20race.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E05%20-%20G%C3%A9nial-O.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E06%20-%20Les%20Jefferson.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E07%20-%20Les%20Gluants.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E08%20-%20Poire%20%C3%A0%20lavement%20et%20sandwich%20au%20caca.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E09%20-%20Le%20Supermarch%C3%A9%20des%20t%C3%A9n%C3%A8bres.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E10%20-%20Maternelle.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E11%20-%20Course%20%C3%A0%20l%27audience.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E12%20-%20Kit%20vid%C3%A9o%20pour%20stupide%20pute%20trop%20g%C3%A2t%C3%A9e.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E13%20-%20Le%20Don%20incroyable%20de%20Cartman.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S08/S08E14%20-%20Le%20No%C3%ABl%20des%20petits%20animaux%20de%20la%20for%C3%AAt.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E01%20-%20Le%20Vagin%20tout%20neuf%20de%20M.%20Garrison.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E02%20-%20Cr%C3%A8ve%20Hippie%2C%20cr%C3%A8ve%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E03%20-%20Wing.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E04%20-%20Potes%20pour%20la%20vie.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E05%20-%20La%20Fureur%20de%20perdre.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E06%20-%20La%20Mort%20d%27Eric%20Cartman.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E07%20-%20Le%20Jour%20des%20%C3%A9rections.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E08%20-%20Deux%20jours%20avant%20le%20jour%20apr%C3%A8s%20demain.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E09%20-%20Marjorine.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E10%20-%20Suivez%20cet%20%C5%93uf%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E11%20-%20Les%20Rouquins.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E12%20-%20Pi%C3%A9g%C3%A9%20dans%20le%20placard.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E13%20-%20Sauvez%20Wilzy-X.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S09/S09E14%20-%20Bloody%20Mary.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E01%20-%20Le%20Retour%20de%20Chef.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E02%20-%20Danger%20Snobfog.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E03%20-%20Cartoon%20Wars%20I%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E04%20-%20Cartoon%20Wars%20II%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E05%20-%20Un%20million%20de%20petites%20fibres.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E06%20-%20Homoursporc.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E07%20-%20Tsst%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E08%20-%20Make%20Love%2C%20Not%20Warcraft.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E09%20-%20Le%20Myst%C3%A8re%20du%20caca%20dans%20l%27urinoir.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E10%20-%20La%20Ma%C3%AEtresse%20de%20Ike.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E11%20-%20L%27Enfer%20sur%20Terre%202006.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E12%20-%20Vas-y%20Dieu%20%21%20Vas-y%20%21%20I%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E13%20-%20Vas-y%20Dieu%20%21%20Vas-y%20%21%20II%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S10/S10E14%20-%20La%20Coupe%20Stanley.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E01%20-%20Avec%20nos%20excuses%20%C3%A0%20Jesse%20Jackson.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E02%20-%20La%20Photo.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E03%20-%20Les%20Poux.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E04%20-%20Chattomique.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E05%20-%20Le%20Fantastique%20Myst%C3%A8re%20de%20P%C3%A2ques.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E06%20-%20G-Win%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E07%20-%20La%20Nuit%20des%20clochards%20vivants.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E08%20-%20Le%20Petit%20Tourette.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E09%20-%20Gros%20Caca.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E10%20-%20Imaginationland%20%3A%20%C3%89pisode%201.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E11%20-%20Imaginationland%20%3A%20%C3%89pisode%202.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E12%20-%20Imaginationland%20%3A%20%C3%89pisode%203.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E13%20-%20Guitare%20Z%C3%A9ro.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S11/S11E14%20-%20La%20Liste.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E01%20-%20Amygdales.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E02%20-%20Le%20Nouveau%20Look%20de%20Britney.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E03%20-%20Plan%C3%A8te%20Gros%20Nibards.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E04%20-%20Canada%20en%20gr%C3%A8ve.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E05%20-%20Ciel%2C%20une%20qu%C3%A9quette%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E06%20-%20Y%27a%20plus%20Internet.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E07%20-%20Un%20%C3%A9pisode%20chez%20les%20cow-boys.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E08%20-%20Le%20Plobl%C3%A8me%20chinois.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E09%20-%20Le%20Combat.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E10%20-%20Pand%C3%A9mie%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E11%20-%20Pand%C3%A9mie%202%2C%20La%20Terreur%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E12%20-%20%C3%80%20propos%20d%27hier%20soir%E2%80%A6.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E13%20-%20Elementary%20School%20Musical.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S12/S12E14%20-%20L%27Impunissable.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E01%20-%20La%20Bague.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E02%20-%20Le%20Coon.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E03%20-%20Margaritaville.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E04%20-%20Mange%2C%20prie%20et%20froute.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E05%20-%20Bite%20au%20nez%20de%20poisson.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E06%20-%20Le%20Derby%20de%20Pinewood.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E07%20-%20Barbob%C3%A8se.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E08%20-%20Vedettes%20mortes.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S13/S13E09%20-%20La%20Meilleure%20Gagneuse%20de%20Butters.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E10%20-%20Catch.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E11%20-%20Putain%20de%20baleines%20%21.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E12%20-%20Fiottes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E13%20-%20Danse%20avec%20les%20Schtroumpfs.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S13/S13E14%20-%20Pipi.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E01%20-%20Gu%C3%A9rison%20sexuelle.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E02%20-%20L%27Histoire%20de%20Scrotie%20McMorvoburnes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E03%20-%20Medicinal%20Fried%20Chicken.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E04%20-%20Vous%20avez%200%20ami.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E05%20-%20200%20%28Partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E06%20-%20201%20%28Partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E07%20-%20%C3%89t%C3%A9%20handicap%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E08%20-%20Pauvre%20et%20stupide.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E09%20-%20C%27est%20un%20truc%20new-jersien.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E10%20-%20Inseption%2C%20m%27voyez.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E11%20-%20Captain%20Konstadt%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E12%20-%20L%27%C3%89veil%20de%20Myst%C3%A9rion%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E13%20-%20Le%20Coon%20contre%20le%20Coon%20et%20sa%20bande%20%28partie%203%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S14/S14E14%20-%20Cr%C3%A8me%20Fra%C3%AEche.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E01%20-%20Humancenti-Pad.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E02%20-%20La%20machine%20%C3%A0%20rigoler.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E03%20-%20Pudding%20Royal.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S15/S15E04%20-%20Taille%20du%20Membre%20Index%C3%A9e.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E05%20-%20Association%20Sportive%20des%20B%C3%A9b%C3%A9s%20du%20Crack.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E06%20-%20City%20Sushi.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E07%20-%20%C3%89tat%20de%20trou%20du%20cul%20cynique%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E08%20-%20Chiasse%20burger%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E09%20-%20Le%20Dernier%20des%20M%C3%A9hicains.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E10%20-%20Le%20Retour%20de%20Lemmiwinks.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E11%20-%20Le%20secret%20de%20Broadway.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S15/S15E12%20-%201%25.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E13%20-%20Thanksgiving%20sur%20History%20Channel.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S15/S15E14%20-%20Le%20plus%20pauvre%20de%20l%27%C3%A9cole.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E01%20-%20Chiottes%20mortelles.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E02%20-%20Bijoux%20de%20famille.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E03%20-%20Nibarding.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E04%20-%20Chupaquh%C3%A9breux.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E05%20-%20Couilles%20molles.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E06%20-%20Je%20n%27aurais%20jamais%20d%C3%BB%20faire%20de%20la%20tyrolienne.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E07%20-%20L%27amour%20selon%20Cartman.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E08%20-%20Sarcastaball.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E09%20-%20Toujours%20plus%20bas.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E10%20-%20Ins%C3%A9curit%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S16/S16E11%20-%20Le%20Hapa%20Loa%20de%20Butters.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S16/S16E12%20-%20Cauchemar%20sur%20Face%20Time.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S16/S16E13%20-%20Un%20bracelet%20pour%20une%20cause.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S16/S16E14%20-%20Obama%20a%20gagn%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S17/S17E01%20-%20T%C3%AAte%20de%20n%C5%93ud.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S17/S17E02%20-%20Porno%20meurtre%20informatif.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/S17/S17E03%20-%20World%20War%20Zimmerman.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S17/S17E04%20-%20Les%20Gothiques%203%20%3A%20L%27Aurore%20des%20frimeurs.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S17/S17E05%20-%20Reluire%20la%20plotte.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S17/S17E06%20-%20Vache%20rouquemoute.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/S17/S17E07%20-%20Black%20Friday%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/S17/S17E08%20-%20Le%20Tr%C3%B4ne%20de%20Fion%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/S17/S17E09%20-%20T%C3%A9tons%20et%20dragons%20%28partie%203%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S17/S17E10%20-%20Le%20Hobbit.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E01%20-%20Va%20te%20faire%20financer.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E02%20-%20Ebola%20sans%20gluten.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E03%20-%20Ph%C3%A9nom%C3%A8ne%20Transgenre.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S18/S18E04%20-%20Handicar.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E05%20-%20Le%20buisson%20ardent.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E06%20-%20Jeux%20gratuits%20payants.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S18/S18E07%20-%20R%C3%A9alit%C3%A9%20augment%C3%A9e.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E08%20-%20Cock%20Magic.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E09%20-%20%23RT%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S18/S18E10%20-%20%23Hologrammes%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S19/S19E01%20-%20Magnifique%20et%20courageuse.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S19/S19E02%20-%20O%C3%B9%20est%20pass%C3%A9%20mon%20pays%20%3F.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S19/S19E03%20-%20Une%20ville%20id%C3%A9ale.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S19/S19E04%20-%20On%20accepte%20pas%20les%20critiques.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S19/S19E05%20-%20Dans%20ma%20bulle.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S19/S19E06%20-%20Tweek%20et%20Craig.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S19/S19E07%20-%20Les%20M%C3%A9chants%20ninjas%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S19/S19E08%20-%20Contenu%20de%20marque%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S19/S19E09%20-%20La%20v%C3%A9rit%C3%A9%20sur%20les%20publicit%C3%A9s%20%28partie%203%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S19/S19E10%20-%20Le%20jugement%20final%20de%20Principal%20PC%20%28partie%204%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E01%20-%20Rappel-baies%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E02%20-%20Chasse%20aux%20garces%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E03%20-%20Les%20%C3%82mes%20perdues%20%28partie%203%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E04%20-%20Les%20Zizis%20sont%20de%20sortie%20%28partie%204%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E05%20-%20Une%20P%C3%A2tisserie%20pour%20les%20Danois%20%28partie%205%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E06%20-%20Fort%20Collins%20%28partie%206%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E07%20-%20Oh%2C%20punaise%20%21%20%28partie%207%29.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S20/S20E08%20-%20Club%20V.I.Baies%20%28partie%208%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S20/S20E09%20-%20Pas%20dr%C3%B4le%20%28partie%209%29.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S20/S20E10%20-%20Rien%20ne%20sera%20plus%20jamais%20comme%20avant%20%28partie%2010%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S21/S21E01%20-%20Des%20blancs%20qui%20r%C3%A9novent%20des%20maisons.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S21/S21E02%20-%20Raccrochez.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/S21/S21E03%20-%20Le%20Jour%20de%20Christophe%20Colomb.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/S21/S21E04%20-%20Le%20Prequel%20du%20Coon%20et%20sa%20bande.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S21/S21E05%20-%20Hummel%20et%20H%C3%A9ro%C3%AFne.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/S21/S21E06%20-%20Fils%20de%20Potter.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/S21/S21E07%20-%20Mensonges%20et%20Trahisons.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/S21/S21E08%20-%20Tardigrades.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/S21/S21E09%20-%20Super%20Principale%20adjointe%20%28partie%201%29.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/S21/S21E10%20-%20Tomates%20%C3%A9crabouill%C3%A9es%20%28partie%202%29.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S22/S22E01%20-%20Enfants%20morts.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S22/S22E02%20-%20Un%20gar%C3%A7on%20et%20un%20pr%C3%AAtre.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S22/S22E03%20-%20Un%20probl%C3%A8me%20de%20caca.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S22/S22E04%20-%20T%C3%A9grit%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S22/S22E05%20-%20Les%20trottinettes.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S22/S22E06%20-%20Un%20peu%20de%20s%C3%A9rieuxe.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S22/S22E07%20-%20Vous%20%C3%AAtes%20s%C3%A9rieuxe%EF%BC%9F.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S22/S22E08%20-%20Bouddha%20Box.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S22/S22E09%20-%20Pas%20livr%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S22/S22E10%20-%20La%20parade%20%C3%A0%20v%C3%A9lo.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S23/S23E01%20-%20Le%20Joker%20mexicain.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E02%20-%20%C3%80%20l%27assaut%20de%20la%20Chine.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E03%20-%20Piq%C3%BBres%20%21%21%21%21.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E04%20-%20Burger%20Pur%C3%A9e.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E05%20-%20Sp%C3%A9ciale%20Halloween%20de%20la%20Ferme%20T%C3%A9grit%C3%A9.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E06%20-%20Fin%20de%20saison.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E07%20-%20Jeux%20de%20filles.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E08%20-%20Voleurs%20de%20caca.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E09%20-%20T%C3%A9l%C3%A9vision%20par%20c%C3%A2ble.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S23/S23E10%20-%20La%20neige%20de%20No%C3%ABl.mkv",
+            "https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S24/S24E01%20-%20Sp%C3%A9cial%20Pand%C3%A9mie.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S24/S24E02%20-%20Sp%C3%A9cial%20Vaccination.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S24/S24E03%20-%20Post%20Covid.mkv",
+            "https://downloads.tatanos.fr/done/South.Park/South.Park.S24/S24E04%20-%20Post%20Covid%20-%20Le%20Retour%20du%20Covid.mkv"
+        ];
+       
+
+        // Ajouter les saisons 2-5
+        for (let s = 2; s <= 5; s++) {
+            for (let e = 1; e <= 17; e++) {
+                const seasonNum = s.toString().padStart(2, '0');
+                const episodeNum = e.toString().padStart(2, '0');
+                m3uPlaylist.push(`https://downloads.tatanos.fr/done/Series/South.Park/South.Park.S${seasonNum}/S${seasonNum}E${episodeNum}%20-%20Episode.mkv`);
+            }
+        }
+
+        // Variables globales
+        let currentEpisodeIndex = -1;
+        let autoplay = false;
+        let playlist = [];
+        let filteredPlaylist = [];
+
+        // Éléments DOM
+        const debugInfo = document.getElementById('debugInfo');
+        const episodeCount = document.getElementById('episodeCount');
+        const totalEpisodes = document.getElementById('totalEpisodes');
+        const totalSeasons = document.getElementById('totalSeasons');
+        const currentEpisode = document.getElementById('currentEpisode');
+        const playlistContent = document.getElementById('playlistContent');
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const actionButtons = document.getElementById('actionButtons');
+        const currentInfo = document.getElementById('currentInfo');
+        const currentTitle = document.getElementById('currentTitle');
+        const currentSeason = document.getElementById('currentSeason');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const streamBtn = document.getElementById('streamBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const autoplayBtn = document.getElementById('autoplayBtn');
+        const autoplayStatus = document.getElementById('autoplayStatus');
+        const randomBtn = document.getElementById('randomBtn');
+        const loadAllBtn = document.getElementById('loadAllBtn');
+        const searchBox = document.getElementById('searchBox');
+
+        // Fonction de debug
+        function debug(message) {
+            console.log(message);
+            debugInfo.innerHTML = `<i class="fas fa-bug"></i> Debug: ${message}`;
+        }
+
+        // Fonction pour parser la playlist M3U - Version simplifiée
+        function parseM3UPlaylist() {
+            debug('Parsing de la playlist M3U...');
+            const episodes = [];
+            
+            try {
+                m3uPlaylist.forEach((url, index) => {
+                    // Extraire le nom du fichier de l'URL
+                    const filename = url.substring(url.lastIndexOf('/') + 1);
+                    
+                    // Décoder les caractères encodés dans l'URL
+                    const decodedFilename = decodeURIComponent(filename);
+                    
+                    // Extraire le titre en enlevant l'extension .mkv
+                    let title = decodedFilename.replace('.mkv', '');
+                    
+                    // Nettoyer le titre
+                    title = title.replace(/S\d+E\d+\s*-\s*/i, '');
+                    
+                    // Déterminer la saison et l'épisode
+                    let season = "Spécial";
+                    let episode = "";
+                    
+                    // Vérifier si c'est un épisode normal (format S##E##)
+                    const seasonMatch = url.match(/S(\d+)E(\d+)/i);
+                    if (seasonMatch) {
+                        const seasonNum = parseInt(seasonMatch[1]);
+                        season = `Saison ${seasonNum}`;
+                        episode = `E${seasonMatch[2]}`;
+                    } else if (title.includes("The End Of Obesity")) {
+                        season = "Spécial";
+                        episode = "Spécial";
+                        title = "South Park The End Of Obesity";
+                    }
+                    
+                    episodes.push({
+                        title: title,
+                        url: url,
+                        season: season,
+                        episode: episode
+                    });
+                });
+                
+                debug(`Parsing réussi: ${episodes.length} épisodes trouvés`);
+                return episodes;
+            } catch (error) {
+                debug(`ERREUR de parsing: ${error.message}`);
+                console.error(error);
+                return [];
+            }
+        }
+
+        // Initialisation
+        function init() {
+            debug('Initialisation de l\'application...');
+            
+            try {
+                // Parser la playlist M3U
+                playlist = parseM3UPlaylist();
+                filteredPlaylist = [...playlist];
+                
+                if (playlist.length === 0) {
+                    debug('ERREUR: Aucun épisode trouvé dans la playlist');
+                    return;
+                }
+                
+                // Mettre à jour les statistiques
+                episodeCount.textContent = playlist.length;
+                totalEpisodes.textContent = playlist.length;
+                
+                // Compter le nombre de saisons uniques
+                const seasons = new Set(playlist.map(ep => ep.season));
+                totalSeasons.textContent = seasons.size;
+                
+                debug(`${playlist.length} épisodes chargés, ${seasons.size} saisons`);
+                
+                // Rendre la playlist
+                renderPlaylist();
+                debug('Playlist rendue avec succès');
+                
+                // Ajouter les écouteurs d'événements
+                setupEventListeners();
+                debug('Écouteurs d\'événements configurés');
+                
+                // Masquer les infos de debug après 3 secondes
+                setTimeout(() => {
+                    debugInfo.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                debug(`ERREUR: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            prevBtn.addEventListener('click', playPrevious);
+            nextBtn.addEventListener('click', playNext);
+            autoplayBtn.addEventListener('click', toggleAutoplay);
+            randomBtn.addEventListener('click', playRandomEpisode);
+            loadAllBtn.addEventListener('click', reloadPlaylist);
+            downloadBtn.addEventListener('click', downloadCurrentEpisode);
+            copyBtn.addEventListener('click', copyCurrentLink);
+            streamBtn.addEventListener('click', tryStreaming);
+            searchBox.addEventListener('input', handleSearch);
+        }
+
+        // Rendre la playlist
+        function renderPlaylist() {
+            debug('Rendu de la playlist...');
+            
+            try {
+                // Grouper par saison
+                const seasons = {};
+                filteredPlaylist.forEach((episode, index) => {
+                    if (!seasons[episode.season]) {
+                        seasons[episode.season] = [];
+                    }
+                    seasons[episode.season].push({...episode, originalIndex: index});
+                });
+
+                // Vider le contenu
+                playlistContent.innerHTML = '';
+
+                // Créer les groupes de saisons
+                Object.keys(seasons).forEach(season => {
+                    const seasonGroup = document.createElement('div');
+                    seasonGroup.className = 'season-group';
+                    
+                    const seasonHeader = document.createElement('div');
+                    seasonHeader.className = 'season-header';
+                    seasonHeader.innerHTML = `
+                        <span class="season-title">${season} (${seasons[season].length} épisodes)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    `;
+                    
+                    const episodeList = document.createElement('div');
+                    episodeList.className = 'episode-list';
+                    
+                    seasons[season].forEach(episode => {
+                        const episodeItem = document.createElement('div');
+                        episodeItem.className = 'episode-item';
+                        if (episode.originalIndex === currentEpisodeIndex) {
+                            episodeItem.classList.add('active');
+                        }
+                        
+                        episodeItem.innerHTML = `
+                            <span class="episode-number">${episode.episode || ''}</span>
+                            <span class="episode-title">${episode.title}</span>
+                        `;
+                        
+                        episodeItem.addEventListener('click', () => selectEpisode(episode.originalIndex));
+                        episodeList.appendChild(episodeItem);
+                    });
+                    
+                    seasonHeader.addEventListener('click', () => {
+                        const isVisible = episodeList.style.display !== 'none';
+                        episodeList.style.display = isVisible ? 'none' : 'block';
+                        const icon = seasonHeader.querySelector('i');
+                        icon.className = isVisible ? 'fas fa-chevron-right' : 'fas fa-chevron-down';
+                    });
+                    
+                    seasonGroup.appendChild(seasonHeader);
+                    seasonGroup.appendChild(episodeList);
+                    playlistContent.appendChild(seasonGroup);
+                });
+                
+                debug(`Playlist rendue: ${Object.keys(seasons).length} saisons`);
+            } catch (error) {
+                debug(`ERREUR de rendu: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        // Sélectionner un épisode
+        function selectEpisode(index) {
+            if (index < 0 || index >= filteredPlaylist.length) return;
+            
+            currentEpisodeIndex = index;
+            const episode = filteredPlaylist[index];
+            
+            debug(`Épisode sélectionné: ${episode.title}`);
+            
+            // Mettre à jour l'interface
+            currentTitle.textContent = episode.title;
+            currentSeason.textContent = episode.season;
+            currentEpisode.textContent = episode.episode || "Spécial";
+            
+            // Afficher les boutons d'action
+            actionButtons.style.display = 'flex';
+            currentInfo.style.display = 'block';
+            
+            // Mettre à jour le bouton de téléchargement
+            downloadBtn.href = episode.url;
+            downloadBtn.download = `${episode.title}.mkv`;
+            
+            // Mettre à jour l'état actif dans la playlist
+            renderPlaylist();
+        }
+
+        // Fonctions de contrôle
+        function playPrevious() {
+            if (currentEpisodeIndex > 0) {
+                selectEpisode(currentEpisodeIndex - 1);
+            }
+        }
+
+        function playNext() {
+            if (currentEpisodeIndex < filteredPlaylist.length - 1) {
+                selectEpisode(currentEpisodeIndex + 1);
+            }
+        }
+
+        function playRandomEpisode() {
+            const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
+            selectEpisode(randomIndex);
+        }
+
+        function toggleAutoplay() {
+            autoplay = !autoplay;
+            autoplayStatus.textContent = autoplay ? 'ON' : 'OFF';
+            debug(`Lecture automatique: ${autoplay ? 'activée' : 'désactivée'}`);
+        }
+
+        function reloadPlaylist() {
+            debug('Rechargement de la playlist...');
+            init();
+        }
+
+        function downloadCurrentEpisode(e) {
+            e.preventDefault();
+            if (currentEpisodeIndex >= 0) {
+                const episode = filteredPlaylist[currentEpisodeIndex];
+                debug(`Téléchargement de: ${episode.title}`);
+                showNotification('Téléchargement démarré...', 'success');
+            }
+        }
+
+        function copyCurrentLink() {
+            if (currentEpisodeIndex >= 0) {
+                const episode = filteredPlaylist[currentEpisodeIndex];
+                navigator.clipboard.writeText(episode.url).then(() => {
+                    showNotification('Lien copié dans le presse-papiers!', 'success');
+                }).catch(() => {
+                    showNotification('Erreur lors de la copie du lien', 'error');
+                });
+            }
+        }
+
+        function tryStreaming() {
+            if (currentEpisodeIndex >= 0) {
+                const episode = filteredPlaylist[currentEpisodeIndex];
+                // Ouvrir dans une nouvelle fenêtre pour essayer le streaming
+                window.open(episode.url, '_blank');
+                showNotification('Tentative de streaming dans une nouvelle fenêtre...', 'info');
+            }
+        }
+
+        function handleSearch() {
+            const searchTerm = searchBox.value.toLowerCase();
+            
+            if (searchTerm === '') {
+                filteredPlaylist = [...playlist];
+            } else {
+                filteredPlaylist = playlist.filter(episode => 
+                    episode.title.toLowerCase().includes(searchTerm) ||
+                    episode.season.toLowerCase().includes(searchTerm) ||
+                    (episode.episode && episode.episode.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            renderPlaylist();
+            debug(`Recherche: ${searchTerm} (${filteredPlaylist.length} résultats)`);
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.backgroundColor = 'rgba(0, 255, 136, 0.9)';
+                    notification.style.border = '1px solid var(--success-color)';
+                    break;
+                case 'error':
+                    notification.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+                    notification.style.border = '1px solid #ff0000';
+                    break;
+                case 'info':
+                    notification.style.backgroundColor = 'rgba(255, 16, 240, 0.9)';
+                    notification.style.border = '1px solid var(--neon-pink)';
+                    break;
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Ajouter les animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Lancer l'initialisation quand le DOM est prêt
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
